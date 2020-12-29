@@ -45,7 +45,8 @@ def rand_translation(x, ratio=0.125):
     )
     grid_x = torch.clamp(grid_x + translation_x + 1, 0, x.size(2) + 1)
     grid_y = torch.clamp(grid_y + translation_y + 1, 0, x.size(3) + 1)
-    x_pad = F.pad(x, [1, 1, 1, 1, 0, 0, 0, 0], mode='constant', value=0.5)
+    pad_val = random.uniform(0.3, 0.7)
+    x_pad = F.pad(x, [1, 1, 1, 1, 0, 0, 0, 0], mode='constant', value=pad_val)
     x = x_pad.permute(0, 2, 3, 1).contiguous()[grid_batch, grid_x, grid_y].permute(0, 3, 1, 2)
     return x
 
@@ -91,9 +92,11 @@ def rand_cutout(x, ratio=0.5):
     mask[grid_batch, grid_x, grid_y] = 0
     x = x * mask.unsqueeze(1)
     mask = torch.zeros(x.size(0), x.size(2), x.size(3), dtype=x.dtype, device=x.device)
-    mask[grid_batch, grid_x, grid_y] = 0.5
+    mask_val = random.uniform(0.3, 0.7)
+    mask[grid_batch, grid_x, grid_y] = mask_val
     x = x + mask.unsqueeze(1)
     return x
+
 
 AUGMENT_FNS = {
     'color': [rand_brightness, rand_saturation, rand_contrast],
